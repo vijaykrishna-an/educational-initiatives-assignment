@@ -1,0 +1,27 @@
+/.idea/
+
+Assignment_1/computer_manufacturing_system/.idea
+Assignment_1/computer_manufacturing_system/target
+
+Assignment_1/smart_farm_system/.idea
+Assignment_1/smart_farm_system/target
+
+Assignment_1/charger_adapter/.idea
+Assignment_1/charger_adapter/target
+
+Assignment_1/tic_tac_toe/.idea
+Assignment_1/tic_tac_toe/target
+
+Assignment_1/workflow_automation/.idea
+Assignment_1/workflow_automation/target
+
+Assignment_1/report_generator/.idea
+Assignment_1/report_generator/target
+
+Assignment_2/.idea/
+
+# Ignore IntelliJ IDEA project settings
+Assignment_2/mars_rover/.idea/
+
+# Ignore Maven/Gradle build output
+Assignment_2/mars_rover/target/
