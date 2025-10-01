@@ -1,0 +1,10 @@
+com\smartfarm\model\PestDetectionSensor.class
+com\smartfarm\config\FarmConfigurationManager.class
+com\smartfarm\factory\PestDetectionSensorFactory.class
+com\smartfarm\model\TemperatureSensor.class
+com\smartfarm\factory\TemperatureSensorFactory.class
+com\smartfarm\model\SoilMoistureSensor.class
+com\smartfarm\factory\SensorFactory.class
+com\smartfarm\factory\SoilMoistureSensorFactory.class
+com\smartfarm\SmartFarmManagementSystem.class
+com\smartfarm\model\Sensor.class
