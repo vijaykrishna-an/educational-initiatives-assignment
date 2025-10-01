@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <!-- 1. Project Coordinates: Defines a unique name for your project. -->
+    <groupId>com.reportgenerator</groupId>
+    <artifactId>report-generator</artifactId>
+    <version>1.0-SNAPSHOT</version>
+
+    <!-- 2. Properties: Sets common configuration values, like the Java version. -->
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+    </properties>
+
+    <!-- 3. Build Configuration: Tells Maven how to build the project. -->
+    <build>
+        <!--
+            IMPORTANT: This line tells Maven to look for source code in the project's
+            root directory instead of the standard 'src/main/java'.
+            This is necessary for your current folder structure.
+        -->
+        <sourceDirectory>.</sourceDirectory>
+
+        <plugins>
+            <!-- This plugin configures how the final JAR file is built. -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.2.2</version>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <!--
+                                This tells Java which class to run when the JAR is executed.
+                                The Main.java file is inside the 'com.reportgenerator' package.
+                            -->
+                            <mainClass>com.reportgenerator.Main</mainClass>
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <!-- 4. Dependencies: Add any external libraries (like Log4j, JUnit, etc.) here. -->
+    <dependencies>
+        <!-- Example: If you wanted to add JUnit for testing -->
+        <!--
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>5.8.2</version>
+            <scope>test</scope>
+        </dependency>
+        -->
+    </dependencies>
+
+</project>
+
