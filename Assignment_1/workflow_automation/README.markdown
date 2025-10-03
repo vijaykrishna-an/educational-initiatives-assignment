@@ -1,187 +1,121 @@
-# Workflow Automation Application
+# Workflow Automation System
 
-Hey there! This is a console-based Java app that simulates a decentralized workflow automation system for remote teams. It lets you create, process, and manage tasks like code reviews or expense approvals, with features like role-based task routing, real-time notifications, and the ability to roll back task states. It’s lightweight, runs entirely in memory, and uses some cool design patterns to keep things organized. Below, I’ve covered the patterns used, what each class does, and how to compile and run the app on your machine.
+A console-based Java application that simulates a modern, flexible workflow automation system. This project allows users with different roles (Junior, Manager, Senior) to create, manage, and process tasks through a realistic lifecycle. The system is built on a foundation of powerful design patterns to ensure the code is decoupled, scalable, and easy to maintain.
 
-Behavioral Patterns Implemented
+It demonstrates advanced concepts like role-based permissions, task delegation, multi-user notifications, and intelligent, authority-based task processing.
 
-The app uses three behavioral design patterns to make it flexible and modular:
+## Key Features
 
-- Chain of Responsibility: Tasks are routed to the right approver (Junior, Manager, or Senior) based on their priority (1 for Low, 2 for Medium, 3 for High). Each role can only approve tasks matching their level.
-- Observer: Tasks notify users in real-time when their status changes, like when a task is approved or rejected.
-- Memento: Saves task states so you can roll back to a previous state, like undoing a rejection to make the task pending again.
+* **Role-Based Access Control** **:** Users are assigned roles (Junior, Manager, Senior) that determine their permissions.
+* **Dynamic Task Lifecycle** **:** Tasks move through a realistic lifecycle (`IN_PROGRESS`, `PENDING_APPROVAL`, `APPROVED`, `REJECTED`, `NEEDS_REWORK`).
+* **Intelligent Workflow Processing** **:** High-authority users can "fast-forward" tasks through multiple approval stages in a single action.
+* **Task Delegation** **:** Managers and Seniors can reassign tasks to other users.
+* **Collaborative Notifications** **:** All users involved in a task's lifecycle are automatically notified of status changes.
+* **Safe Undo Functionality** **:** Users can revert their most recent action, preventing mistakes before they move up the chain.
 
-These patterns keep the code clean and make it easy to add new features later.
+## Architectural Design & Patterns
 
-Class Descriptions
+The application's logic is driven by three core behavioral design patterns, implemented in an advanced and decoupled manner.
 
-All classes are in the `com.workflow` package. Here’s what each one does:
+### 1. Chain of Responsibility (CoR)
 
-- core/Task.java: Represents a task with a description, priority (1=Low, 2=Medium, 3=High), and status (Pending, Approved, Rejected). It holds observers for notifications and mementos for state rollback.
-- core/User.java: Represents a user with a username, password, and role (Junior, Manager, Senior). It’s used for authentication and task processing.
-- patterns/chainofresponsibility/ApproverHandler.java: An abstract class for handling task approvals in a chain. It defines the logic for passing tasks to the next handler.
-- patterns/chainofresponsibility/JuniorHandler.java: Handles approval for low-priority tasks (priority 1). Only Junior users can approve these.
-- patterns/chainofresponsibility/ManagerHandler.java: Handles approval for medium-priority tasks (priority 2). Only Manager users can approve these.
-- patterns/chainofresponsibility/SeniorHandler.java: Handles approval for high-priority tasks (priority 3). Only Senior users can approve these.
-- patterns/memento/TaskMemento.java: Stores a snapshot of a task’s state (status and reason) for rollback.
-- patterns/memento/TaskOriginator.java: Manages task state creation and restoration for the Memento pattern.
-- patterns/memento/MementoCaretaker.java: Keeps a stack of task mementos to support state rollback.
-- patterns/observer/TaskObserver.java: An interface for objects that need task status updates.
-- patterns/observer/TaskSubject.java: An interface for tasks to manage observers and send notifications.
-- patterns/observer/UserObserver.java: Notifies a user when a task’s status changes (e.g., “Task abc12345 approved”).
-- services/AuthenticationService.java: Handles user registration and login, storing users in a HashMap.
-- services/NotificationService.java: Manages sending status updates to users via the Observer pattern.
-- services/WorkflowService.java: Orchestrates task creation, processing (approve/reject), and rollback, tying together the patterns.
-- ui/ConsoleInterface.java: Provides the console-based UI, showing menus and handling user input for all actions.
-- Main.java: The starting point. It launches the app, shows the main menu (login, register, exit), and drives the workflow.
+This pattern is the engine of the workflow. The application uses a **Task Processing Chain** that intelligently advances a task's status based on the user's authority and the desired action. For example, a Senior user can approve a task that is still in `DRAFT`, and the chain will correctly execute all intermediate steps (`Start`, `Submit`, `Manager Approval`, `Senior Approval`) behind the scenes. This demonstrates the pattern's true power in handling complex, stateful operations.
 
-Prerequisites for Compilation and Execution
+### 2. Observer
 
-To get the app running, you’ll need:
+The notification system is completely decoupled using a central **`EventManager`**. The `Task` object is a clean data object and does not manage observers itself. When a task's state changes, the `WorkflowService` informs the `EventManager`, which then notifies  **all users who have ever interacted with the task** **, creating a realistic, collaborative notification model.**
 
-- Java Development Kit (JDK): Version 8 or higher (tested with JDK 17). Check with `java -version`.
-- Apache Maven: Version 3.6.0 or higher for easy building. Check with `mvn -version`. Download from the Apache Maven website if needed.
-- Command Prompt/Terminal: Use Command Prompt on Windows (since your path is `C:\Users\ANVK\Desktop\workflow-automation`).
-- Project Files: Ensure all source files are in `src/main/java/com/workflow` as shown in the structure below.
+### 3. Memento
 
-The project structure should look like this:
+This pattern provides a **step-specific "Undo"** feature. A snapshot of a task's state is saved *before* any major action (like submitting or approving). This allows the user who performed the action to revert their own mistake before the task moves to the next stage. Once a task receives final approval, its undo history is cleared to ensure process finality.
+
+## Task Lifecycle
+
+The journey of a task through the system follows a clear and logical path:
+
+1. **`DRAFT`** **:** Any user can create a task. It starts in this initial state.
+2. **`IN_PROGRESS`** **:** A user with appropriate authority (based on task priority) starts work.
+3. **`PENDING_MANAGER_APPROVAL`** **:** The task is submitted for review.
+4. **`PENDING_SENIOR_APPROVAL`** **:** After a Manager's approval, it awaits final sign-off.
+5. **`APPROVED`** **:** The Senior gives final approval, completing the workflow.
+
+* **`NEEDS_REWORK`** **:** A task can be sent back by a Senior for corrections.
+* **`REJECTED`** **:** A Manager or Senior can terminate the workflow permanently.
+
+## Project Structure
 
 ```
-workflow-automation/
-├── src/
-│   ├── main/
-│   │   └── java/
-│   │       └── com/
-│   │           └── workflow/
-│   │               ├── core/
-│   │               │   ├── Task.java
-│   │               │   └── User.java
-│   │               ├── patterns/
-│   │               │   ├── chainofresponsibility/
-│   │               │   │   ├── ApproverHandler.java
-│   │               │   │   ├── JuniorHandler.java
-│   │               │   │   ├── ManagerHandler.java
-│   │               │   │   └── SeniorHandler.java
-│   │               │   ├── memento/
-│   │               │   │   ├── TaskMemento.java
-│   │               │   │   ├── TaskOriginator.java
-│   │               │   │   └── MementoCaretaker.java
-│   │               │   ├── observer/
-│   │               │   │   ├── TaskObserver.java
-│   │               │   │   ├── TaskSubject.java
-│   │               │   │   └── UserObserver.java
-│   │               ├── services/
-│   │               │   ├── AuthenticationService.java
-│   │               │   ├── NotificationService.java
-│   │               │   └── WorkflowService.java
-│   │               ├── ui/
-│   │               │   └── ConsoleInterface.java
-│   │               └── Main.java
+workflow_automation/
+├── core/
+│   ├── PriorityLevel.java
+│   ├── Task.java
+│   ├── TaskStatus.java
+│   ├── User.java
+│   └── UserRole.java
+├── patterns/
+│   ├── chainofresponsibility/
+│   │   ├── ManagerApprovalHandler.java
+│   │   ├── SeniorApprovalHandler.java
+│   │   ├── StartTaskHandler.java
+│   │   ├── SubmitTaskHandler.java
+│   │   ├── TaskActionRequest.java
+│   │   └── TaskProcessorHandler.java
+│   ├── memento/
+│   │   ├── MementoCaretaker.java
+│   │   └── TaskMemento.java
+│   └── observer/
+│       ├── EventManager.java
+│       ├── LoggingObserver.java
+│       ├── TaskObserver.java
+│       └── UserObserver.java
+├── services/
+│   ├── AuthenticationService.java
+│   ├── NotificationService.java
+│   └── WorkflowService.java
+├── ui/
+│   └── ConsoleInterface.java
+├── Main.java
 ├── pom.xml
 └── README.md
 ```
 
-Compilation and Execution Illustration
+## Getting Started
 
-Here’s how to compile and run the app step-by-step. These commands are for Windows Command Prompt (using backslashes `\`). Replace `YourUsername` with your actual username (e.g., `ANVK`).
+### Prerequisites
 
-1. Open Command Prompt:
-   - Press `Win + R`, type `cmd`, and hit Enter to open Command Prompt.
+* **Java Development Kit (JDK)** **:** Version 8 or higher.
+* **Apache Maven** **:** For dependency management and building.
 
-2. Navigate to Project Root:
-   - Move to the project folder:
-     ```
-     cd C:\Users\YourUsername\Desktop\workflow-automation
-     ```
+### Compilation & Execution
 
-3. Clean Previous Build Artifacts:
-   - Clear out old compiled files to start fresh:
-     ```
-     mvn clean
-     ```
-   - You’ll see:
-     ```
-     [INFO] Deleting C:\Users\YourUsername\Desktop\workflow-automation\target
-     [INFO] BUILD SUCCESS
-     ```
+1. **Clone the repository** to your local machine.
+2. **Open a terminal** or command prompt and navigate to the project's root directory (`workflow_automation/`).
+3. **Clean and Compile** the project using Maven:
 
-4. Compile the Application:
-   - Compile all source files:
-     ```
-     mvn compile
-     ```
-   - Expected output:
-     ```
-     [INFO] Compiling X source files to C:\Users\YourUsername\Desktop\workflow-automation\target\classes
-     [INFO] BUILD SUCCESS
-     ```
-   - This creates `.class` files in `target\classes\com\workflow`.
+   ```
+   mvn clean compile
+   ```
+4. **Run** the application:
 
-5. Run the Application:
-   - Start the app:
-     ```
-     mvn exec:java -Dexec.mainClass="com.workflow.Main"
-     ```
-   - The app begins with:
-     ```
-     === Workflow Automation System ===
-     1. Login
-     2. Register
-     3. Exit
-     Choose option:
-     ```
-   - Follow prompts to register, log in, create/process tasks, or roll back states (e.g., enter `2` to register, then `1` to log in).
+   ```
+   mvn exec:java -Dexec.mainClass="com.workflow.Main"
+   ```
 
-6. Automate with a Batch File (Optional):
-   - Create a file called `run.bat` in the project root using Notepad:
-     ```
-     @echo off
-     mvn clean
-     mvn compile
-     mvn exec:java -Dexec.mainClass="com.workflow.Main"
-     ```
-   - Save and run it:
-     ```
-     run.bat
-     ```
-   - This runs all steps (clean, compile, execute) in one go.
+The application will start, presenting you with the main menu.
 
-7. What to Expect When Running:
-   - Register a user with a username, password, and role (Junior, Manager, Senior).
-   - Log in to access the menu: create tasks (e.g., “Review code changes”, priority 1-3), list tasks, process tasks (approve/reject), roll back tasks, or log out.
-   - Example task creation:
-     ```
-     Task description: Review code changes
-     Priority (1=Low, 2=Medium, 3=High): 2
-     Task created: abc12345
-     ```
-   - Example task rejection:
-     ```
-     Task ID: abc12345
-     Action (1=Approve, 2=Reject): 2
-     Enter rejection reason (optional): Needs more details
-     Task abc12345 rejected with reason: Needs more details
-     ```
-   - Invalid inputs (e.g., wrong role for task approval) show clear errors like: `Permission denied: Role mismatch`.
+## Usage Scenarios
 
-Troubleshooting
+### Standard Workflow
 
-- Compilation Fails:
-  - Check that all source files are in `src/main/java/com/workflow`.
-  - Ensure `pom.xml` has the Maven Compiler and Exec plugins for Java 17.
-  - Run with debug to see details:
-    ```
-    mvn compile -e -X
-    ```
-- Maven or Java Missing:
-  - Install JDK 17+ and set JAVA_HOME (e.g., `set JAVA_HOME=C:\Program Files\Java\jdk-17`).
-  - Install Maven and add its `bin` folder to PATH (e.g., `C:\Program Files\Maven\bin`).
-- Runtime Issues:
-  - If the app crashes or loops, verify all source files match the described structure.
-  - Run with debug:
-    ```
-    mvn exec:java -Dexec.mainClass="com.workflow.Main" -X
-    ```
-- File Issues:
-  - Use a text editor (e.g., Notepad++, VS Code) to check for invisible characters (use UTF-8 encoding, no BOM).
+1. A **Senior** logs in and creates a **LOW** priority task.
+2. The Senior **reassigns** this task to a **Junior** user.
+3. The **Junior** logs in, sees the task in their list, and **starts** it (`IN_PROGRESS`).
+4. The Junior **submits** the task (`PENDING_MANAGER_APPROVAL`).
+5. A **Manager** logs in and **approves** the task (`PENDING_SENIOR_APPROVAL`).
+6. The **Senior** logs in and gives the **final approval** (`APPROVED`).
 
-That’s it! You’re ready to compile and run the Workflow Automation app. Have fun managing tasks!
+### "Fast-Forward" Workflow (CoR in Action)
+
+1. A **Junior** creates and submits a **LOW** priority task (`PENDING_MANAGER_APPROVAL`).
+2. A **Senior** logs in, sees the task, and chooses the "Approve" action.
+3. The Chain of Responsibility intelligently executes both the Manager and Senior approval steps in sequence. The task status jumps directly to `APPROVED`, and all involved users are notified of the rapid progress.
